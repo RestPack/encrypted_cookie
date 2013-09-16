@@ -17,7 +17,7 @@ Gem::Specification.new do |s|
   s.require_paths = ["lib"]
   s.rubyforge_project = %q{encrypted_cookie}
   s.rubygems_version = %q{1.3.7}
-  s.signing_key = %q{/home/cvk/.gemcert/gem-private_key.pem}
+  # s.signing_key = %q{/home/cvk/.gemcert/gem-private_key.pem}
   s.summary = %q{Encrypted session cookies for Rack}
 
   if s.respond_to? :specification_version then
