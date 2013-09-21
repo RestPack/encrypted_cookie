@@ -8,18 +8,18 @@ module Rack
     # Rack::Session::EncryptedCookie provides AES-256-encrypted, tamper-proof
     # cookie-based session management.
     class EncryptedCookie
-      def initialize(app)
+      def initialize(app) #TODO: GJ: allow overriding of default options
         @app = app
       end
 
       def call(env)
-        options = env['rack.session.options']
+        options = env['restpack.session.options'].dup
 
         unless options[:secret]
           fail "Error! env['rack.session.options'][:secret] is required to use encrypted cookies."
         end
 
-        options[:key] ||= "rack.session"
+        options[:key] ||= "restpack.session"
         options[:path] ||= "/"
 
         encryptor = Encryptor.new(options[:secret])
@@ -41,20 +41,19 @@ module Rack
 
         begin
           session_data = Marshal.load(session_data)
-          env["rack.session"] = session_data
+          env["restpack.session"] = session_data
         rescue
-          env["rack.session"] = Hash.new
+          env["restpack.session"] = Hash.new
         end
       end
 
       def commit_session(env, encryptor, options, status, headers, body)
-        session_data = Marshal.dump(env["rack.session"])
+        session_data = Marshal.dump(env["restpack.session"])
         session_data = encryptor.encrypt(session_data)
 
         if session_data.size > (4096 - options[:key].size)
           env["rack.errors"].puts("Warning! Rack::Session::Cookie data size exceeds 4K. Content dropped.")
         else
-          options = env["rack.session.options"]
           cookie = Hash.new
           cookie[:value] = session_data
           cookie[:expires] = Time.now + options[:expire_after] unless options[:expire_after].nil?
